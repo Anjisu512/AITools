@@ -1,0 +1,48 @@
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: aitool-db
+    ports:
+      - "1433:1433"
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: "Developer"
+      SA_PASSWORD: "Admin123!"
+    volumes:
+      - mssql-data:/var/opt/mssql
+    restart: unless-stopped
+
+  db-init:
+    image: mcr.microsoft.com/mssql-tools
+    container_name: aitool-db-init
+    depends_on:
+      - db
+    volumes:
+      - ./db/init.sql:/init.sql
+    command: >
+      bash -c "
+      echo '⏳ Waiting for SQL Server...' &&
+      sleep 20 &&
+      /opt/mssql-tools/bin/sqlcmd
+      -S db
+      -U sa
+      -P 'Admin123!'
+      -i /init.sql
+      "
+    restart: "no"
+
+  app:
+    image: aitool-app
+    container_name: aitool-app
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db-init
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:sqlserver://db:1433;databaseName=aitool;encrypt=false
+      SPRING_DATASOURCE_USERNAME: sa
+      SPRING_DATASOURCE_PASSWORD: Admin123!
+    restart: unless-stopped
+
+volumes:
+  mssql-data:

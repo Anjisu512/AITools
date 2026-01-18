@@ -1,0 +1,5 @@
+IF DB_ID('aitool') IS NULL
+BEGIN
+    CREATE DATABASE aitool;
+END
+GO
