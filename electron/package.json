@@ -1,0 +1,27 @@
+{
+	"name": "aitool",
+	"version": "1.0.0",
+	"main": "main.js",
+	"scripts": {
+		"start": "electron .",
+		"build": "electron-builder"
+	},
+	"build": {
+		"appId": "com.aitool.app",
+		"productName": "AITool",
+		"asar": true,
+		"asarUnpack": [
+			"jre/**",
+			"javaBuild/**"
+		],
+		"files": [
+			"**/*"
+		],
+		"directories": {
+			"output": "dist"
+		},
+		"win": {
+			"target": "portable"
+		}
+	}
+}

@@ -32,6 +32,9 @@ services:
     restart: "no"
 
   app:
+    build:
+      context: .
+      dockerfile: Dockerfile
     image: aitool-app
     container_name: aitool-app
     ports:

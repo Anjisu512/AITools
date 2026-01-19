@@ -22,7 +22,9 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
-
+   	
+   	//thymeleaf template
+   	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 	//MSSQL JDBC
 	implementation 'com.microsoft.sqlserver:mssql-jdbc:12.6.1.jre11'
 

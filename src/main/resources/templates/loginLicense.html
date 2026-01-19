@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>AITool License</title>
+</head>
+<body>
+    <h2>License Key 입력</h2>
+
+    <input id="licenseKey" placeholder="XXXX-XXXX-XXXX" />
+    <button onclick="verify()">확인</button>
+
+    <p id="result"></p>
+
+    <script>
+        function verify() {
+            fetch('/api/login/verify', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    licenseKey: document.getElementById('licenseKey').value
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('result').innerText =
+                    data.valid ? '인증 성공' : '유효하지 않은 키';
+            });
+        }
+    </script>
+</body>
+</html>
