@@ -25,9 +25,12 @@ dependencies {
    	
    	//thymeleaf template
    	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+	
 	//MSSQL JDBC
 	implementation 'com.microsoft.sqlserver:mssql-jdbc:12.6.1.jre11'
-
+	
+	implementation 'com.fasterxml.jackson.core:jackson-databind'
+	
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 

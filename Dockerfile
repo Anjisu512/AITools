@@ -1,4 +1,4 @@
-# 1️⃣ build stage
+# build stage
 FROM eclipse-temurin:17-jdk AS build
 WORKDIR /app
 
@@ -11,7 +11,7 @@ RUN ./gradlew dependencies --no-daemon
 COPY . .
 RUN ./gradlew build -x test --no-daemon
 
-# 2️⃣ run stage
+# run stage
 FROM eclipse-temurin:17-jdk
 WORKDIR /app
 COPY --from=build /app/build/libs/*.jar app.jar

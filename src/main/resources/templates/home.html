@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta charset="UTF-8">
+	<title>메인 홈페이지</title>
+	<link rel="stylesheet" th:href="@{/css/main.css}">
+</head>
+
+<body>
+	<h1 th:text="${message}">기본 메시지</h1>
+	<p>Docker 환경에서 실행 중입니다.</p>
+	<script th:src="@{/js/main.js}"></script>
+	<script th:src="@{/js/licenseVerify.js}"></script>
+</body>
+
+</html>

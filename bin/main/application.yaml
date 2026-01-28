@@ -1,6 +1,7 @@
 spring:
   datasource:
-    url: jdbc:sqlserver://db:1433;databaseName=aitool;encrypt=false
+    # url: jdbc:sqlserver://db:1433;databaseName=aitool;encrypt=false (기존 컨테이너용)
+    url: jdbc:sqlserver://localhost:1433;databaseName=aitool;encrypt=false
     username: sa
     password: Admin123!
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver

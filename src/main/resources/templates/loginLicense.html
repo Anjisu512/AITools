@@ -1,32 +1,25 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.thymeleaf.org">
+
 <head>
-    <meta charset="UTF-8">
-    <title>AITool License</title>
+	<meta charset="UTF-8">
+	<title>License Key</title>
+	<link rel="stylesheet" th:href="@{/css/main.css}">
 </head>
+
 <body>
-    <h2>License Key 입력</h2>
+	
+	<div class="container">
+	    <h2>License Key 입력</h2>
+	    <div class="input-group">
+	        <input type="text" id="licenseKey" placeholder="라이선스 키를 입력하세요">
+	        <button type="button" onclick="verify()">확인</button>
+	    </div>
+	    <div id="result" style="color: red; margin-top: 10px;"></div>
+	</div>
 
-    <input id="licenseKey" placeholder="XXXX-XXXX-XXXX" />
-    <button onclick="verify()">확인</button>
-
-    <p id="result"></p>
-
-    <script>
-        function verify() {
-            fetch('/api/login/verify', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    licenseKey: document.getElementById('licenseKey').value
-                })
-            })
-            .then(res => res.json())
-            .then(data => {
-                document.getElementById('result').innerText =
-                    data.valid ? '인증 성공' : '유효하지 않은 키';
-            });
-        }
-    </script>
+	<script th:src="@{/js/main.js}"></script>
+	<script th:src="@{/js/licenseVerify.js}"></script>
 </body>
+
 </html>
