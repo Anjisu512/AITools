@@ -1,35 +1,53 @@
+
+/* 기본 초기화 */
 body {
-    font-family: 'Malgun Gothic', sans-serif;
     margin: 0;
-    padding: 20px;
-    border-top: 4px solid #f39c12; /* 상단 오렌지 라인 */
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
 }
 
+.header{
+	margin-left: 240px;
+}
+/* 사이드바 너비만큼 컨텐츠를 오른쪽으로 밀어줌 */
 .container {
+    margin-left: 240px; 
+    padding: 50px;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    align-items: center;
+    justify-content: center;
+    min-height: 80vh;
 }
 
 h2 {
-    margin: 0 0 5px 0;
-    font-size: 1.2rem;
+    color: #333;
+    margin-bottom: 25px;
 }
 
 .input-group {
     display: flex;
-    gap: 5px;
+    gap: 10px;
 }
 
 input[type="text"] {
-    border: 1px solid #767676;
-    padding: 2px 5px;
-    width: 200px;
+    padding: 12px;
+    width: 300px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
 }
 
 button {
-    background-color: #efefef;
-    border: 1px solid #767676;
-    padding: 2px 10px;
+    padding: 12px 25px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 4px;
     cursor: pointer;
+    font-weight: bold;
+}
+
+button:hover {
+    background-color: #2980b9;
 }

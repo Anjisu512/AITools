@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.aitool.aitool.config.ApiExceptionBuild;
 import com.aitool.aitool.dto.RequestLicenseDTO;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,31 +30,39 @@ public class LicenseController {
 	@PostMapping("/verify")
 	public ResponseEntity<RequestLicenseDTO> verify(@RequestBody Map<String, String> body, HttpSession session) {
         String inputKey = body.get("licenseKey");
-        
-        // 1. Gist에서 정보 조회 (기존에 만든 Map 반환 함수 활용)
-        Map<String, String> userInfo = checkGistForLicense(GIST_RAW_URL, inputKey);
-        
         RequestLicenseDTO dto = new RequestLicenseDTO();
+        try {
+	        // 1. Gist에서 정보 조회 (기존에 만든 Map 반환 함수 활용)
+	        Map<String, String> userInfo = checkGistForLicense(GIST_RAW_URL, inputKey);
+	        
+	
+	        if (userInfo != null) {
+	            // 인증 성공
+	            session.setAttribute("LICENSE_AUTH", true);
+	            session.setAttribute("USER_ID", userInfo.get("id"));
+	
+	            dto.setValid(true);
+	            dto.setId(userInfo.get("id"));
+	            dto.setExpireDate(userInfo.get("expire_date"));
+	            dto.setLicenseKey(userInfo.get("licenseKey"));
+	            dto.setRedirect("/");
+	            dto.setMessage("인증에 성공했습니다.");
+	            return ResponseEntity.ok(dto);
+	        } else {
+	            throw new ApiExceptionBuild(HttpStatus.UNAUTHORIZED,"유효하지 않은 키이거나 만료된 키입니다.");
+	        }
+	
+        } catch (ApiExceptionBuild e) {
+            // 서비스 및 위 로직에서 발생한 커스텀 예외 처리 (400, 404, 409, 429 등)
+            dto.setCode(e.getStatus().value());
+            dto.setMessage(e.getMessage());
+            return ResponseEntity.status(e.getStatus()).body(dto);
 
-        if (userInfo != null) {
-            // 인증 성공
-            session.setAttribute("LICENSE_AUTH", true);
-            session.setAttribute("USER_ID", userInfo.get("id"));
-
-            dto.setValid(true);
-            dto.setId(userInfo.get("id"));
-            dto.setExpireDate(userInfo.get("expire_date"));
-            dto.setLicenseKey(userInfo.get("licenseKey"));
-            dto.setRedirect("/");
-            dto.setMessage("인증에 성공했습니다.");
-
-            return ResponseEntity.ok(dto);
-        } else {
-            // 인증 실패
-            dto.setValid(false);
-            dto.setMessage("유효하지 않거나 만료된 라이선스 키입니다.");
-            
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(dto);
+        }  catch (Exception e) {
+            // 기타 서버 내부 오류 처리 (500)
+        	System.err.println(e);
+            dto.setMessage("서버 오류가 발생했습니다.");
+            return ResponseEntity.status(500).body(dto);
         }
     }
 	
@@ -87,7 +96,8 @@ public class LicenseController {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            // 인증 실패
+            throw new ApiExceptionBuild(HttpStatus.UNAUTHORIZED,"유효하지 않거나 만료된 라이선스 키입니다.");
         }
         return null;
     }
@@ -105,7 +115,8 @@ public class LicenseController {
             
             return today.isAfter(expireDate); // 오늘이 만료일보다 뒤면 true(만료)
         } catch (Exception e) {
-            return true; // 시간 확인 불가 시 안전하게 만료 처리
+        	// 날짜 확인 실패
+            throw new ApiExceptionBuild(HttpStatus.NOT_FOUND,"현재 시간을 찾을 수 없습니다. 다시 시도해주세요.");
         }
     }
 }

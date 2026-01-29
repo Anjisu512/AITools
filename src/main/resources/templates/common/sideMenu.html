@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+	<head>
+		<meta charset="UTF-8">
+		<link rel="stylesheet" th:href="@{/css/main.css}">
+		<link rel="stylesheet" th:href="@{/css/sideMenu.css}">
+		<link rel="stylesheet" th:href="@{/css/customAlert.css}"> </head>
+	</head>
+	
+	<div th:fragment="sideMenu" class="side-menu">
+		<div class="menu-logo">
+			<img th:src="@{/images/logo.png}" alt="AI Tool" onerror="this.style.display='none'">
+			<span>AI Tool System</span>
+		</div>
+		<nav class="menu-list">
+			<ul>
+				<li><a th:href="@{/}" class="active">홈</a></li>
+				<li><a href="#">대시보드</a></li>
+				<li><a href="#">설정</a></li>
+				<li><a href="#">도움말</a></li>
+			</ul>
+		</nav>
+		<div class="menu-footer">
+			<p>v1.0.0</p>
+		</div>
+	</div>
+
+</html>

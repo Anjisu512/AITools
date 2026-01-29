@@ -7,6 +7,7 @@ import lombok.Setter;
 @Setter
 public class RequestLicenseDTO {
     private boolean valid;      // 인증 성공 여부
+    private int code;			// 상태code
     private String id;          // 사용자 ID
     private String expireDate;  // 만료일
     private String licenseKey;  // 입력한 키

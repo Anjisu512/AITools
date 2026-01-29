@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+	<head>	
+		<meta charset="UTF-8">
+		<title>페이지 제목</title>
+		<link rel="stylesheet" th:href="@{/css/customAlert.css}">
+	</head>
+	
+	<body>	
+		<div th:fragment="customAlert" id="custom-alert-overlay" class="custom-alert-overlay">
+			<div class="custom-alert-box">
+				<h3 id="custom-alert-title"></h3>
+				<p id="custom-alert-message"></p>
+				<div class="custom-alert-buttons">
+					<button id="custom-alert-ok-button" class="custom-alert-button">확인</button>
+				</div>
+			</div>
+		</div>
+	
+		<script th:src="@{/js/customAlert.js}"></script>
+	</body>
+
+</html>

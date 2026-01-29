@@ -3,15 +3,26 @@
 
 <head>
 	<meta charset="UTF-8">
-	<title>메인 홈페이지</title>
+	
+	<title class="header">메인 홈페이지</title>
 	<link rel="stylesheet" th:href="@{/css/main.css}">
+	<link rel="stylesheet" th:href="@{/css/sideMenu.css}">
+	<link rel="stylesheet" th:href="@{/css/customAlert.css}"> </head>
 </head>
 
 <body>
-	<h1 th:text="${message}">기본 메시지</h1>
-	<p>Docker 환경에서 실행 중입니다.</p>
+	<div th:replace="~{common/sideMenu :: sideMenu}"></div>
+	<div class="container">
+		<h1 th:text="${message}">기본 메시지</h1>
+		<p>Docker 환경에서 실행 중입니다.</p>
+	</div>
+	
+	
+	<div th:replace="~{common/customAlert :: customAlert}"></div>
+	
 	<script th:src="@{/js/main.js}"></script>
 	<script th:src="@{/js/licenseVerify.js}"></script>
+	<script th:src="@{/js/customAlert.js}"></script>
 </body>
 
 </html>

@@ -1,0 +1,52 @@
+/* 사이드바 전체 컨테이너 */
+.side-menu {
+    width: 240px;
+    height: 100vh;
+    background-color: #2c3e50;
+    color: #ecf0f1;
+    position: fixed; /* 좌측 고정 */
+    left: 0;
+    top: 0;
+    display: flex;
+    flex-direction: column;
+    z-index: 1000;
+}
+
+.menu-logo {
+    padding: 30px 20px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    border-bottom: 1px solid #34495e;
+    text-align: center;
+}
+
+.menu-list {
+    flex: 1;
+    margin-top: 20px;
+}
+
+.menu-list ul {
+    list-style: none;
+    padding: 0;
+}
+
+.menu-list li a {
+    display: block;
+    padding: 15px 25px;
+    color: #bdc3c7;
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+.menu-list li a:hover, .menu-list li a.active {
+    background-color: #34495e;
+    color: white;
+    border-left: 4px solid #3498db;
+}
+
+.menu-footer {
+    padding: 20px;
+    font-size: 0.8rem;
+    color: #7f8c8d;
+    text-align: center;
+}

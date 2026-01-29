@@ -1,0 +1,73 @@
+/* 오버레이 (배경) 스타일 */
+.custom-alert-overlay {
+    position: fixed; /* 화면 전체에 고정 */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6); /* 반투명 검정 배경 */
+    display: flex; /* Flexbox를 사용하여 내용 중앙 정렬 */
+    justify-content: center; /* 가로 중앙 */
+    align-items: center; /* 세로 중앙 */
+    z-index: 2000; /* 다른 요소들 위에 표시 */
+    display: none; /* 기본적으로 숨김 */
+}
+
+/* 알림 상자 스타일 */
+.custom-alert-box {
+    background-color: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+    animation: fadeInScale 0.2s ease-out forwards; /* 나타나는 애니메이션 */
+}
+
+.custom-alert-box h3 {
+    margin-top: 0;
+    color: #333;
+    font-size: 1.5em;
+    margin-bottom: 15px;
+}
+
+.custom-alert-box p {
+    color: #555;
+    font-size: 1.1em;
+    line-height: 1.5;
+    margin-bottom: 25px;
+}
+
+/* 버튼 스타일 */
+.custom-alert-buttons {
+    display: flex;
+    justify-content: center;
+}
+
+.custom-alert-button {
+    background-color: #3498db; /* 파란색 */
+    color: white;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.2s ease;
+}
+
+.custom-alert-button:hover {
+    background-color: #2980b9; /* 호버 시 약간 어두워짐 */
+}
+
+/* 애니메이션 */
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}

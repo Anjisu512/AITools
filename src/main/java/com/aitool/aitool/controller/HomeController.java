@@ -1,10 +1,10 @@
 package com.aitool.aitool.controller;
 
+import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
 
-@RestController
+@Controller
 public class HomeController {
 
 	@GetMapping("/")
@@ -13,6 +13,6 @@ public class HomeController {
         model.addAttribute("message", "안녕하세요! AI Tool의 메인 페이지입니다.");
         model.addAttribute("initLicense", "TestLicense");
         
-        return "index"; 
+        return "home"; 
     }
 }
