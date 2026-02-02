@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"> 
+	<body>
+		<div th:fragment="apiKeyHelpModal" class="help-modal" id="apiKeyHelpModal">
+			<div class="help-modal-content">
+				<h3>API Key 발급 방법</h3>
+	
+				<p><strong>ChatGPT</strong></p>
+				<ol>
+					<li>OpenAI 홈페이지 접속</li>
+					<li>계정 로그인</li>
+					<li>API Keys 메뉴 이동</li>
+					<li>새 키 생성 후 복사</li>
+				</ol>
+	
+				<p><strong>Gemini</strong></p>
+				<ol>
+					<li>Google AI Studio 접속</li>
+					<li>API Key 생성</li>
+					<li>발급된 Key 복사</li>
+				</ol>
+	
+				<div class="modal-footer">
+					<button type="button" class="modal-close-btn" id="closeApiKeyHelp">닫기</button>
+				</div>
+			</div>
+		</div>
+	</body>
+
+</html>

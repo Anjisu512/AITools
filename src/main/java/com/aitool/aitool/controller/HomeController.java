@@ -15,4 +15,16 @@ public class HomeController {
         
         return "home"; 
     }
+	
+	@GetMapping("/settings")
+	public String setting(Model model) {
+		
+		return "settings";
+	}
+	
+	@GetMapping("/posting")
+	public String posting(Model model) {
+		
+		return "posting";
+	}
 }

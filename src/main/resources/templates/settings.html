@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta charset="UTF-8">
+
+	<title class="header">설정</title>
+	<link rel="stylesheet" th:href="@{/css/main.css}">
+	<link rel="stylesheet" th:href="@{/css/sideMenu.css}">
+	<link rel="stylesheet" th:href="@{/css/settings.css}">
+	<link rel="stylesheet" th:href="@{/css/customAlert.css}">
+</head>
+</head>
+
+<body>
+	<div th:replace="~{common/sideMenu :: sideMenu}"></div>
+
+	<div class="settings-wrapper">
+		<!-- 제목 -->
+		<div class="settings-header">
+			<h1>Settings</h1>
+		</div>
+
+		<!-- 설정 리스트 (스크롤 영역) -->
+		<div class="settings-content">
+			<!-- 설정 항목 1 -->
+			<div class="settings-item">
+					<div class="settings-label">AI Tool 선택</div>
+					<div class="settings-control">
+						<label>
+							<input type="radio" name="aiTool" value="chatgpt">
+							ChatGPT
+						</label>
+						<label>
+							<input type="radio" name="aiTool" value="gemini" checked>
+							Gemini
+						</label>
+					</div>
+			</div>
+			<div class="settings-item">
+				<div class="settings-label">AI API Key</div>
+				<div class="settings-control">
+			       <input type="text" name="aiApiKey" placeholder="해당 Tool의 본인 API Key를 입력해주세요"/>
+			   </div>
+			   <!-- 도움말 버튼 -->
+				<button type="button" class="help-icon" id="apiKeyHelpBtn" aria-label="API Key 도움말">
+					?
+				</button>
+			</div>
+			<div class="settings-item">
+			    <div class="settings-label">추가 프롬프트 설정</div>
+
+				<div class="settings-control file-upload">
+					<!-- 실제 file input (숨김) -->
+					<input type="file" id="extraPromptFile" name="extraPromptFile" accept=".txt,.xml" hidden />
+					<!-- 커스텀 file input 버튼 -->
+					<button type="button" class="file-select-btn">
+						파일 선택
+					</button>
+					<!-- 파일명 표시 -->
+					<span class="file-name">선택된 파일 없음</span>
+				</div>
+			</div>
+			
+		</div>
+
+		<!-- 저장 버튼 -->
+		<div class="settings-footer">
+			<button id="saveSettingsBtn">설정 저장</button>
+		</div>
+	</div>
+
+
+
+	<div th:replace="~{common/customAlert :: customAlert}"></div>
+	<div th:replace="~{common/apiKeyHelpModal :: apiKeyHelpModal}"></div>
+	
+	<script th:src="@{/js/main.js}"></script>
+	<script th:src="@{/js/licenseVerify.js}"></script>
+	<script th:src="@{/js/settings.js}"></script>
+	<script th:src="@{/js/customAlert.js}"></script>
+</body>
+
+</html>

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta charset="UTF-8">
+	
+	<title class="header">블로그 포스팅</title>
+	<link rel="stylesheet" th:href="@{/css/main.css}">
+	<link rel="stylesheet" th:href="@{/css/sideMenu.css}">
+	<link rel="stylesheet" th:href="@{/css/customAlert.css}"> </head>
+</head>
+
+<body>
+	<div th:replace="~{common/sideMenu :: sideMenu}"></div>
+	
+	 
+	
+	
+	<div th:replace="~{common/customAlert :: customAlert}"></div>
+	
+	<script th:src="@{/js/main.js}"></script>
+	<script th:src="@{/js/licenseVerify.js}"></script>
+	<script th:src="@{/js/customAlert.js}"></script>
+</body>
+
+</html>

@@ -18,7 +18,8 @@ public class LicenseAuthFilter extends OncePerRequestFilter {
 		String uri = request.getRequestURI();
 
 		// 허용 경로
-		if (uri.startsWith("/loginLicense") || uri.startsWith("/api/login") || uri.startsWith("/css/") || uri.startsWith("/js/") || uri.startsWith("/images/") || uri.equals("/favicon.ico")) {
+//		if (uri.startsWith("/loginLicense") || uri.startsWith("/api/login") || uri.startsWith("/css/") || uri.startsWith("/js/") || uri.startsWith("/images/") || uri.equals("/favicon.ico")) {
+		if(uri.startsWith("/")) {
 			filterChain.doFilter(request, response);
 			return;
 		}
