@@ -54,6 +54,13 @@
     cursor: pointer;
 }
 
+.settings-password {
+	padding: 12px;
+	width: 300px;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+}
+
 /*=============================
  	? 아이콘 버튼
 =============================== */  

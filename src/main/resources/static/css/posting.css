@@ -1,0 +1,44 @@
+/* 전체 wrapper */
+.postings-wrapper {
+	margin-left: 240px;   /* 사이드 메뉴 폭 */
+	height: 100vh;
+	display: flex;
+	flex-direction: column;
+	padding: 24px 32px;
+	box-sizing: border-box;
+} 
+
+
+/* 각 설정 항목 */
+.postings-item {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+	margin-bottom: 10px;
+}
+
+/* 왼쪽 라벨 */
+.postings-label {
+    min-width: 120px;   /* 라벨 폭 고정 */
+    font-weight: 500;
+}
+
+
+/*=============================
+		 오른쪽 컨트롤 
+=============================== */
+.postings-control {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.postings-control label {
+    margin: 0;
+    cursor: pointer;
+}
+
+.postings-col-item { 
+	box-sizing: border-box;
+	margin-top: 10px;
+}

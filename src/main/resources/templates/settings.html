@@ -28,11 +28,11 @@
 					<div class="settings-label">AI Tool 선택</div>
 					<div class="settings-control">
 						<label>
-							<input type="radio" name="aiTool" value="chatgpt">
+							<input type="radio" name="aiTool" value="chatgpt" checked>
 							ChatGPT
 						</label>
 						<label>
-							<input type="radio" name="aiTool" value="gemini" checked>
+							<input type="radio" name="aiTool" value="gemini">
 							Gemini
 						</label>
 					</div>
@@ -61,7 +61,19 @@
 					<span class="file-name">선택된 파일 없음</span>
 				</div>
 			</div>
-			
+			<div class="settings-item">
+				<div class="settings-label">네이버 ID</div>
+				<div class="settings-control">
+					<input type="text" name="naverID" placeholder="ID" />
+				</div>
+			</div>
+			<div class="settings-item">
+				<div class="settings-label">Password</div>
+				<div class="settings-control">
+					<input class="settings-password" type="password" 
+					autocomplete="off" spellcheck="false" name="naverPW" placeholder="Password" />
+				</div>
+			</div>
 		</div>
 
 		<!-- 저장 버튼 -->
@@ -75,6 +87,7 @@
 	<div th:replace="~{common/customAlert :: customAlert}"></div>
 	<div th:replace="~{common/apiKeyHelpModal :: apiKeyHelpModal}"></div>
 	
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 	<script th:src="@{/js/main.js}"></script>
 	<script th:src="@{/js/licenseVerify.js}"></script>
 	<script th:src="@{/js/settings.js}"></script>
