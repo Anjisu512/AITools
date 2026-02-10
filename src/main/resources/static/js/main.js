@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
         else {
             link.classList.remove('active');
         }
+		
     });
 
 });

@@ -15,29 +15,64 @@
 <body>
 	<div th:replace="~{common/sideMenu :: sideMenu}"></div>
 	<div class="postings-wrapper">
-		<!-- 첨부된 명령프롬포트를 사용할지 여부-->
-		<div class="postings-item">
-			<div class="postings-label">Setting에 첨부된 추가 프롬포트 사용 여부</div>
-			<div class="postings-control">
-				<label>
-					<input type="radio" name="useAiTool" value="true" checked>
-					사용
-				</label>
-				<label>
-					<input type="radio" name="useAiTool" value="false">
-					미사용
-				</label>
+		<div class="postings-main-content">
+		
+			<!-- 좌측 출력 Container -->
+			<div class="postings-setup-area">
+				<div class="setup-content">
+					<div class="postings-item">
+						<div class="postings-label">Setting에 첨부된 추가 프롬포트 사용 여부</div>
+						<div class="postings-control">
+							<label><input type="radio" name="useAiTool" value="true" checked> 사용</label>
+							<label><input type="radio" name="useAiTool" value="false"> 미사용</label>
+						</div>
+					</div>
+					<br />
+					<div class="postings-col-item">
+						<div style="display: flex;">
+							<label for="searchCategory" class="postings-label"> 🔹 카테고리(최대 5개)</label>
+							<p style="margin: 5px; font-size: 10px; color: gray;">구분자는 쉼표(,)로 구분해주세요</p>
+						</div>
+						<input type="text" class="form-control" id="searchCategory" placeholder="카테고리를 입력하세요">
+					</div>
+					<br />
+					<div class="postings-col-item">
+						<label class="postings-label">🔹 블로그 크롤링 갯수</label>
+						<div class="number-control">
+							<button type="button" onclick="valueHandler(this, -1)">&#10094;</button>
+							<input type="number" id="crollingQty" value="5" min="1" max="10" readonly>
+							<button type="button" onclick="valueHandler(this, 1)">&#10095;</button>
+						</div>
+					</div>
+					<br />
+					<div class="postings-col-item">
+						<label class="postings-label">🔹 블로그 작성 갯수</label>
+						<div class="number-control">
+							<button type="button" onclick="valueHandler(this, -1)">&#10094;</button>
+							<input type="number" id="writeQty" value="5" min="1" max="10" readonly>
+							<button type="button" onclick="valueHandler(this, 1)">&#10095;</button>
+						</div>
+					</div>
+				</div>
+				
+				<!-- footer -->
+				<div class="setup-footer">
+					<button type="button" class="btn btn-primary w-100">Ai Tool 실행</button>
+				</div>
 			</div>
+			
+			<!-- Log 출력 Container -->
+			<div class="postings-log-area">
+				<div class="log-header">📜 실행 로그</div>
+				<div id="logConsole" class="log-box">
+					> 시스템이 준비되었습니다.
+				</div>
+			</div>
+	
 		</div>
-		<!-- 검색할 카테고리 -->
-		<div class="postings-col-item">
-			<label for="searchCategory" class="form-label">🔹검색 카테고리</label>
-			<input type="text" class="form-control" id="searchCategory" placeholder="카테고리를 입력하세요">
-		</div>
-	 
 	</div>
 	 
-	<button type="button" class="btn btn-primary">Primary</button>
+	
 	
 	<div th:replace="~{common/customAlert :: customAlert}"></div>
 	

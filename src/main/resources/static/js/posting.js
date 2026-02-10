@@ -21,3 +21,21 @@ updateSelectedAiTool();
 isUsedRadio.forEach(radio => {
     radio.addEventListener('change', updateSelectedAiTool);
 });
+
+// Input범위는 1~10
+function valueHandler(btn, step) {
+    // 클릭된 버튼(btn)의 부모(.number-control) 안에서 input 요소 조회
+    const container = btn.closest('.number-control');
+    const input = container.querySelector('input[type="number"]');
+    
+    let value = parseInt(input.value) || 0;
+    const min = parseInt(input.min);
+    const max = parseInt(input.max);
+
+    const newValue = value + step;
+
+    // 범위 체크 후 값 적용
+    if (newValue >= min && newValue <= max) {
+        input.value = newValue;
+    }
+}
