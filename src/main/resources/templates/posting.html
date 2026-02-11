@@ -37,7 +37,7 @@
 					</div>
 					<br />
 					<div class="postings-col-item">
-						<label class="postings-label">🔹 블로그 크롤링 갯수</label>
+						<label class="postings-label">🔹 블로그 크롤링 수</label>
 						<div class="number-control">
 							<button type="button" onclick="valueHandler(this, -1)">&#10094;</button>
 							<input type="number" id="crollingQty" value="5" min="1" max="10" readonly>
@@ -45,11 +45,21 @@
 						</div>
 					</div>
 					<br />
+					<p style="margin: 5px; font-size: 10px; color: gray;">임시작성과 작성수의 개수는 10개를 넘길 수 없습니다.</p>
 					<div class="postings-col-item">
-						<label class="postings-label">🔹 블로그 작성 갯수</label>
+						<label class="postings-label">🔹 블로그 임시 작성 수</label>
 						<div class="number-control">
 							<button type="button" onclick="valueHandler(this, -1)">&#10094;</button>
-							<input type="number" id="writeQty" value="5" min="1" max="10" readonly>
+							<input type="number" id="tempWriteQty" value="5" min="0" max="10" readonly>
+							<button type="button" onclick="valueHandler(this, 1)">&#10095;</button>
+						</div>
+					</div>
+					<br />
+					<div class="postings-col-item">
+						<label class="postings-label">🔹 블로그 작성 수</label>
+						<div class="number-control">
+							<button type="button" onclick="valueHandler(this, -1)">&#10094;</button>
+							<input type="number" id="realWriteQty" value="5" min="0" max="10" readonly>
 							<button type="button" onclick="valueHandler(this, 1)">&#10095;</button>
 						</div>
 					</div>
@@ -57,7 +67,7 @@
 				
 				<!-- footer -->
 				<div class="setup-footer">
-					<button type="button" class="btn btn-primary w-100">Ai Tool 실행</button>
+					<button type="button" onclick="blogPostingStart()" class="btn btn-primary w-100">Ai Tool 실행</button>
 				</div>
 			</div>
 			
@@ -65,7 +75,8 @@
 			<div class="postings-log-area">
 				<div class="log-header">📜 실행 로그</div>
 				<div id="logConsole" class="log-box">
-					> 시스템이 준비되었습니다.
+					> Ai Tool 시스템이 준비되었습니다. <br/>
+					> Ai Tool Button을 클릭하여 포스팅을 시작해보세요
 				</div>
 			</div>
 	

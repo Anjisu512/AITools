@@ -21,7 +21,8 @@
 			"output": "dist"
 		},
 		"win": {
-			"target": "portable"
+			"target": "portable",
+			"icon": "img/icon.ico" 			
 		}
 	}
 }
