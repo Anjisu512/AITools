@@ -140,7 +140,7 @@ button:hover {
     background-color: #1e1e1e; /* 터미널 느낌 */
     color: #d4d4d4;
     padding: 15px;
-    font-family: 'Consolas', monospace;
+	font-family: 'Consolas', 'Courier New', monospace;
     font-size: 13px;
     border-radius: 8px;
     overflow-y: auto; /* 로그가 길어지면 스크롤 생성 */
@@ -148,10 +148,15 @@ button:hover {
     line-height: 1.6;
 }
 
+.log-box div {
+    border-bottom: 1px solid #333; /* 로그 간 구분선*/
+    padding: 2px 0;
+}
+
 .log-header {
     font-weight: bold;
     margin-bottom: 8px;
-}
+} 
 
 .log-container {
     flex: 1; /* 남은 모든 공간을 차지 */

@@ -57,7 +57,7 @@ function valueHandler(btn, step) {
 }
 
 
-function blogPostingStart(){
+async function blogPostingStart(){
 	// storage에 담겨있는 정보 get
 	const stored = localStorage.getItem('appSettings');
 	const settings = JSON.parse(stored);
@@ -72,7 +72,13 @@ function blogPostingStart(){
     if (settings.naverPW) {		
 		settings.naverPW = deobfuscate(settings.naverPW); // 복원된 값을 다시 입력하여 settings자체를 parameter로 전달
     };
-	 
+	
+	// api호출시 log화면에 실시간으로 진행률을 보여주기위함
+	const logConsole = document.getElementById("logConsole");
+	// 새로운 실행이 시작될 때 기존 로그 제거
+    logConsole.innerHTML = "";
+	let lastServerLog = ""; // 서버에서 보낸 마지막 텍스트를 저장할 변수 에러인 경우는 마지막 텍스트를 보내줘야함
+	
 	const body = {        
 		settings : settings,
         useAiTool: selectedAiTool,
@@ -81,28 +87,75 @@ function blogPostingStart(){
         tempWriteQty: parseInt(document.getElementById('tempWriteQty')?.value),
         realWriteQty: parseInt(document.getElementById('realWriteQty')?.value)
     };
-	
-	// 2. 백엔드 전송 (fetch 호출)
-    fetch('/api/ai/posting', { // 실제 백엔드 URL로 변경하세요
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(body) // 객체를 JSON 문자열로 변환
-    })
-    .then(response => {
-        if (response.ok) return response.json();
-        throw new Error('Network response was not ok.');
-    })
-    .then(result => {
-        showAlert("Posting성공!","성공!");
-    })
-    .catch(error => {
-		showAlert("에러!", "Posting 요청 중 에러가 발생했습니다.");
-    });
-	
-	
+
+    try {
+        const response = await fetch('/api/ai/posting', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+
+        // 스트림 읽기 시작
+        while (true) {
+            const { value, done } = await reader.read();
+            if (done) break;
+
+            const chunk = decoder.decode(value);
+            // SSE 데이터는 "data: 메시지\n\n" 형식이므로 필요한 텍스트만 추출
+            const lines = chunk.split('\n');
+            lines.forEach(line => {
+                if (line.startsWith('data:')) {
+                    const message = line.replace('data:', '').trim();
+
+                    // 로그 박스에 추가
+                    const logEntry = document.createElement("div");
+                    logEntry.innerHTML = message; // "> ... " 형태의 메시지
+                    logConsole.appendChild(logEntry);
+
+                    // 최하단으로 자동 스크롤
+                    logConsole.scrollTop = logConsole.scrollHeight;
+                }
+            });
+        }
+		
+		// [체크] 만약 루프가 끝났는데 마지막 메시지가 에러 관련이라면
+	    if (lastServerLog.includes("[실패]") || lastServerLog.includes("[에러]")) {
+	        // 여기서 에러 전용 UI 처리를 한 번 더 해줍니다.
+	        renderErrorLog(lastServerLog); 
+	    }
+    } catch (error) {
+        showAlert("에러!", "로그 스트리밍 중 에러 발생, 로그를 확인해주세요");
+		// error.message 대신 서버가 마지막으로 보낸 lastServerLog를 출력
+		let finalMsg = lastServerLog;
+	    if (!finalMsg || finalMsg === "") {
+	        finalMsg = "> [시스템 오류] " + error.message; 
+	    }
+
+	    const errorMessage = `
+	        <div style="color: #ff6b6b; font-weight: bold; margin-bottom: 5px;">
+	            ${finalMsg}
+	        </div>
+	        <div style="color: #ff6b6b; font-size: 0.9em;">
+	            > 로그 스트리밍이 중단되었습니다. 잠시 후 초기화됩니다.
+	        </div>
+	    `;
+	    logConsole.innerHTML += errorMessage;
+	    logConsole.scrollTop = logConsole.scrollHeight;
+    }
 }
+
+// Log영역에 log출력
+function appendLog(message) {
+    const logBox = document.querySelector(".log-content");
+    const div = document.createElement("div");
+    div.innerText = message;
+    logBox.appendChild(div);
+    logBox.scrollTop = logBox.scrollHeight; // 스크롤 하단 고정
+}
+
 
 // 복원
 function deobfuscate(str) {
@@ -119,4 +172,3 @@ function deobfuscate(str) {
         return null;
     }
 }
-
