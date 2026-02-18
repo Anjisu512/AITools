@@ -1,6 +1,7 @@
 package com.aitool.aitool.controller;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -34,22 +35,25 @@ public class AiToolController {
 			try {
 				// [로그] 시작 알림
 				sendChatLog(emitter, "> Ai Tool 시스템이 준비되었습니다.");
-				throw new Exception("이건에러");
-//				// 카테고리 리스트 파싱 (쉼표 기준)
-//				List<String> categories = Arrays.stream(request.getSearchCategory().split(",")).map(String::trim)
-//						.filter(s -> !s.isEmpty()).collect(Collectors.toList());
-//
-//				// [로그] 크롤링 시작
-//				sendChatLog(emitter, "> 블로그 크롤링을 시작합니다...");
-//
-//				for (int i = 0; i < categories.size(); i++) {
-//					String cat = categories.get(i);
-//					// [로그] 카테고리별 진행 상황
-//					sendChatLog(emitter, String.format("> [%d/%d] '%s' 카테고리 크롤링 중...", (i + 1), categories.size(), cat));
-//
-//					// 실제 크롤링 서비스 로직 수행
-//					// aiToolService.crollingAi(request) TODO:  내부에서 로그를 더 세분화 하기위해 emitter를 서비스 레이어까지 넘겨줄것
-//				}
+				
+				// 카테고리 리스트 파싱 (쉼표 기준)
+				List<String> categories = Arrays.stream(request.getSearchCategory().split(",")).map(String::trim)
+						.filter(s -> !s.isEmpty()).collect(Collectors.toList());
+
+				// [로그] 크롤링 시작
+				sendChatLog(emitter, "> 블로그 크롤링을 시작합니다...");
+				List<String> crawlingDataList = new ArrayList<>();
+				for (int i = 0; i < categories.size(); i++) {
+					String category = categories.get(i);
+					// [로그] 카테고리별 진행 상황
+					sendChatLog(emitter, String.format("> [%d/%d] '%s' 카테고리 크롤링 중...", (i + 1), categories.size(), category));
+
+					// 실제 크롤링 서비스 로직 수행
+					String crawlingData = aiToolService.crawlingBlog(request, emitter, category); // TODO:  내부에서 로그를 더 세분화 하기위해 emitter를 서비스 레이어까지 넘겨줄것
+					crawlingDataList.add(crawlingData);
+					sendChatLog(emitter, String.format("> [%s]에 대한 크롤링 완료...", category)); 
+				}
+				sendChatLog(emitter, "> 모든 카테고리에 대한 크롤링 완료!");
 //
 //				// [로그] 글 작성 단계
 //				sendChatLog(emitter, "> 크롤링 완료! 이제 AI 포스팅 작성을 시작합니다...");

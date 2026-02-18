@@ -33,10 +33,23 @@ function valueHandler(btn, step) {
     const max = parseInt(input.max);
     const newValue = value + step;
 
-    // 개별 입력창의 최소/최대 범위 체크
-    if (newValue < min || newValue > max) {
+	// [최소값 체크] 1보다 작아지는 것은 알림 없이 차단 
+    if (newValue < min) {
 		return;
-	};
+	}
+
+    // 최대값(10) 이상 클릭하는 경우 알림 및 차단
+    const messages = {
+        'crawlingBlogQty': '블로그 크롤링 수는 10개를 넘길 수 없습니다.',
+        'crawlingNewsQty': '뉴스 크롤링 수는 10개를 넘길 수 없습니다.',
+        'tempWriteQty': '블로그 임시 작성 수는 10개를 넘길 수 없습니다.',
+        'realWriteQty': '블로그 작성 수는 10개를 넘길 수 없습니다.'
+    };
+
+    if (newValue > 10 && messages[input.id]) {
+        showAlert("개수 초과", messages[input.id]);
+        return;
+    }
 
     // 임시 작성(tempWriteQty)과 실제 작성(realWriteQty)의 합계 체크
     if (input.id === 'tempWriteQty' || input.id === 'realWriteQty') {
@@ -51,18 +64,20 @@ function valueHandler(btn, step) {
             return; // 합이 10을 넘으면 실행 중단
         }
     }
-
+	
+	
     // 모든 조건 통과 시 값 반영
     input.value = newValue;
 }
 
 
 async function blogPostingStart(){
-	// storage에 담겨있는 정보 get
+	// storage에 담겨있는 정보와 대시보드내에 있는 정보들 get
 	const stored = localStorage.getItem('appSettings');
 	const settings = JSON.parse(stored);
 	const searchCategory = document.querySelector('input[name="searchCategory"].value');
-	const crollingQty = parseInt(document.getElementById('crollingQty').value) || 0;
+	const crawlingBlogQty = parseInt(document.getElementById('crawlingBlogQty').value) || 0;
+	const crawlingNewsQty = parseInt(document.getElementById('crawlingNewsQty').value) || 0;
 	const tempWriteQty = parseInt(document.getElementById('tempWriteQty').value) || 0;
   	const realWriteQty = parseInt(document.getElementById('realWriteQty').value) || 0;
 	 
@@ -83,9 +98,10 @@ async function blogPostingStart(){
 		settings : settings,
         useAiTool: selectedAiTool,
         searchCategory: document.getElementById('searchCategory')?.value,
-        crollingQty: parseInt(document.getElementById('crollingQty')?.value),
-        tempWriteQty: parseInt(document.getElementById('tempWriteQty')?.value),
-        realWriteQty: parseInt(document.getElementById('realWriteQty')?.value)
+        crawlingBlogQty: parseInt(crawlingBlogQty),
+        crawlingNewsQty: parseInt(crawlingNewsQty),
+        tempWriteQty: parseInt(tempWriteQty),
+        realWriteQty: parseInt(realWriteQty)
     };
 
     try {
@@ -99,33 +115,44 @@ async function blogPostingStart(){
         const decoder = new TextDecoder();
 
         // 스트림 읽기 시작
+		let remainder = ""; // 처리가 덜 된 문자열 조각을 저장
         while (true) {
             const { value, done } = await reader.read();
-            if (done) break;
+            if (done) {
+                break;
+            } 
 
-            const chunk = decoder.decode(value);
-            // SSE 데이터는 "data: 메시지\n\n" 형식이므로 필요한 텍스트만 추출
-            const lines = chunk.split('\n');
-            lines.forEach(line => {
-                if (line.startsWith('data:')) {
-                    const message = line.replace('data:', '').trim();
+			// 이전 청크의 남은 조각 + 현재 청크
+		    const chunk = remainder + decoder.decode(value, { stream: true });			
+		    const lines = chunk.split('\n');
+			
+            // 마지막 요소는 줄바꿈이 아직 안 왔을 수 있으므로 다음으로 넘김, data: 로 시작하는걸 읽어오는데 쪼개져서 넘어오는 문제가 확인되어 2번확인하게되었음
+            remainder = lines.pop();
+			
+			lines.forEach(line => {
+		        const trimmedLine = line.trim();
+		        if (trimmedLine.startsWith('data:')) {
+		            const message = trimmedLine.replace('data:', '').trim();
+					lastServerLog = message; // 마지막 메시지 업데이트
 
-                    // 로그 박스에 추가
-                    const logEntry = document.createElement("div");
-                    logEntry.innerHTML = message; // "> ... " 형태의 메시지
-                    logConsole.appendChild(logEntry);
-
-                    // 최하단으로 자동 스크롤
-                    logConsole.scrollTop = logConsole.scrollHeight;
-                }
-            });
+					// [체크] 이번 출력 메시지가 에러 관련이라면
+				    if (lastServerLog.includes("[실패]") || lastServerLog.includes("[에러]")) {
+						console.error("서버 에러 감지:", message);
+						throw new Error(lastServerLog);
+				    }
+					
+					// 로그 박스에 추가
+		            const logEntry = document.createElement("div");
+		            logEntry.innerHTML = message;  // "> ... " 형태의 메시지
+		            logConsole.appendChild(logEntry);
+					
+					// 최하단으로 자동 스크롤
+		            logConsole.scrollTop = logConsole.scrollHeight;
+		        }
+		    }); 
         }
 		
-		// [체크] 만약 루프가 끝났는데 마지막 메시지가 에러 관련이라면
-	    if (lastServerLog.includes("[실패]") || lastServerLog.includes("[에러]")) {
-	        // 여기서 에러 전용 UI 처리를 한 번 더 해줍니다.
-	        renderErrorLog(lastServerLog); 
-	    }
+		
     } catch (error) {
         showAlert("에러!", "로그 스트리밍 중 에러 발생, 로그를 확인해주세요");
 		// error.message 대신 서버가 마지막으로 보낸 lastServerLog를 출력
