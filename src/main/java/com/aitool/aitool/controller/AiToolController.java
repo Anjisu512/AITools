@@ -1,6 +1,10 @@
 package com.aitool.aitool.controller;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -70,24 +74,41 @@ public class AiToolController {
 				// AI를 통해 가져온 content목록을토대로 naver블로그 작성/임시작성
 				// JSON형태로 저장되어있으므로 각각 필요한 부분을 추출하여 마지막 단계 진행
 				ObjectMapper objectMapper = new ObjectMapper();
+				
+				
+				/** 체험판 느낌으로 검색 결과를 바탕화면에 우선 저장하도록 **/
+				// C 드라이브에 AITool 폴더 경로 설정
+				File storageDir = new File("C:" + File.separator + "AITool");
+				// 폴더가 없으면 생성
+				if (!storageDir.exists()) {
+				    boolean created = storageDir.mkdirs();
+				    if (created) {
+				        System.out.println("폴더를 생성했습니다: " + storageDir.getAbsolutePath());
+				    }
+				}
 				for(String answer : generateResult) {
 				    // 1. JSON String을 List<Map<String, Object>> 형태로 변환
 				    List<Map<String, Object>> postList = objectMapper.readValue(answer, new TypeReference<List<Map<String, Object>>>() {});
 	
-				    // 
 				    if (!postList.isEmpty()) {
 				        String title = (String) postList.get(0).get("title");
 				        String content = (String) postList.get(0).get("content");
-				        List<String> keywords = (List<String>) postList.get(0).get("keywords");
+				        List<String> tagKeywords = (List<String>) postList.get(0).get("tagKeywords");
 				        
-				        System.out.println("제목: " + title);
-				        System.out.println("본문: " + content);
-				        System.out.println("keywords: " + keywords);
+				        // 파일명 안전 처리
+			            String safeFileName = title.replaceAll("[\\\\/:*?\"<>|]", "_");
+			            File file = new File(storageDir, safeFileName + ".txt"); 
+
+			            try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, StandardCharsets.UTF_8))) {
+			                writer.write("제목: " + title + "\n\n");
+			                writer.write("본문:\n" + content + "\n\n");
+			                writer.write("태그 키워드: " + String.join(", ", tagKeywords));
+							sendChatLog(emitter, String.format("> [%s] Text파일을 C:\\AITool 폴더에 저장하였습니다.", title)); 
+			            }
 				    }
-				}
+				} 
 				
-				
-				sendChatLog(emitter, "> 모든 포스팅 작성이 완료되었습니다.");
+				sendChatLog(emitter, "> 모든 포스팅 작성이 완료되었습니다."); 
 
 				// 작업 종료 알림 (complete를 호출해야 연결 종료)
 				emitter.complete();

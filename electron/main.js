@@ -36,6 +36,9 @@ function startSpringBoot() {
     });
 }
 
+// icon의 경로
+const iconPath = path.join(__dirname, 'img', 'icon.ico');
+
 // 프로그램창 생성 및 제어 로직
 function createWindows() {
 	// 앱 시작 시 세션(쿠키, 스토리지 등)을 싹 비우기
@@ -47,7 +50,7 @@ function createWindows() {
         frame: false,       // 상단 바 제거
         alwaysOnTop: true,  // 항상 위에
         transparent: true,  // 배경 투명 가능
-		// icon: path.join(__dirname, 'build/icon.ico'), // 나중에 아이콘 준비되면 주석 해제
+		icon: iconPath, // 로딩창 아이콘
         webPreferences: { contextIsolation: true }
     });
     splashWindow.loadFile('loading.html');
@@ -56,9 +59,8 @@ function createWindows() {
     mainWindow = new BrowserWindow({
         width: 1200, height: 800,
         show: false, // 서버 완료 전까지 숨김
-		// icon: path.join(__dirname, 'build/icon.ico'), // 앱 실행 시 아이콘
-		autoHideMenuBar: true, // Alt 키를 누를 때만 메뉴가 나오게 함
-		// icon: path.join(__dirname, 'build/icon.ico'), // 나중에 아이콘 준비되면 주석 해제
+		icon: iconPath, // 앱 실행 시 아이콘
+		autoHideMenuBar: true, // Alt 키를 누를 때만 메뉴가 나오게 함 
         webPreferences: { contextIsolation: true }
     });
 	

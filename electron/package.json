@@ -1,6 +1,8 @@
 {
 	"name": "aitool",
 	"version": "1.0.0",
+	"description": "AI 기반 블로그 포스팅 툴",
+	"author": "AnJisu",
 	"main": "main.js",
 	"scripts": {
 		"start": "electron .",
