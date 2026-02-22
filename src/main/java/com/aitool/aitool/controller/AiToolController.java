@@ -44,10 +44,20 @@ public class AiToolController {
 				// [로그] 시작 알림
 				sendChatLog(emitter, "> Ai Tool 시스템이 준비되었습니다.");
 				
+				
+				
 				// 카테고리 리스트 파싱 (쉼표 기준)
 				List<String> categories = Arrays.stream(request.getSearchCategory().split(",")).map(String::trim)
 						.filter(s -> !s.isEmpty()).collect(Collectors.toList());
-
+				// Request 및 필수 Settings누락의 경우 에러 반환하도록 수정
+				if (categories.size() <= 0) {
+					throw new Exception("크롤링 및 포스팅을 위한 카테고리를 입력해주세요. ");
+				}
+				String errorMsg = checkRequiredData(request);
+				// errorMsg가 ""가 아닌경우
+				if(!errorMsg.equals("")) {
+					throw new Exception(errorMsg);
+				}
 				// [로그] 크롤링 시작
 				sendChatLog(emitter, "> 블로그 크롤링을 시작합니다...");
 				Map<String,Set<String>> crawlingLinkData = new LinkedHashMap<>();
@@ -127,6 +137,42 @@ public class AiToolController {
 		});
 
 		return emitter;
+	}
+
+	// 필수로 작성되어야하는 Setting값 혹은 데이터가 있는지 여부 체크
+	private String checkRequiredData(requestPostingDTO request) {
+		Map<String, Object> settings = request.getSettings();
+		// settings가 아예 비어있는경우
+		if(settings == null) {
+			return "AI Tool을 사용하기 위해서는 설정 페이지에서 존재하는 필수 입력값들이 입력되어있어야 합니다.";
+		}
+		// AI Tool에 사용될 API key 여부
+		String apiKey = (String) settings.get("aiToolKey");
+		if(apiKey == null || apiKey.isBlank()) {
+			return "AI Tool을 사용하기 위해서는 설정 페이지에서 GPT 혹은 Gemini의 API Key를 필수로 입력해야합니다.";
+		}
+		// 블로그 크롤링 수
+		int crawBlog = request.getCrawlingBlogQty();
+		// 뉴스 크롤링 수 
+		int crawNews = request.getCrawlingNewsQty();
+		// 실제작성수
+		int realWrite = request.getRealWriteQty();
+		// 임시저장수 
+		int tempWrite = request.getTempWriteQty();
+		
+		// 크롤링 관련 Valid 체크 
+		boolean isCrawlingTargetSelected = (crawBlog + crawNews >= 1);
+		
+		// 작성 관련 Valid 체크
+		boolean isWritingTargetSelected = (realWrite + tempWrite >= 1);
+		if (!isCrawlingTargetSelected) {
+	        return "AI Tool을 사용하기 위해서는 블로그 혹은 뉴스에 대한 크롤링 수가 1 이상이여야 합니다.";
+	    }
+		// 블로그/뉴스 크롤링수가 1 이상인지 먼저 확인 후 작성에 대한 개수 체크
+	    if (!isWritingTargetSelected) {
+	    	return "AI Tool을 사용하기 위해서는 포스팅 혹은 임시저장에 대한 수가 1 이상이여야 합니다.";
+	    }
+	    return "";
 	}
 
 	// 로그 전송을 위한 헬퍼 메소드

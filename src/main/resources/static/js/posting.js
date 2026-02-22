@@ -81,19 +81,19 @@ async function blogPostingStart(){
 	const tempWriteQty = parseInt(document.getElementById('tempWriteQty').value) || 0;
   	const realWriteQty = parseInt(document.getElementById('realWriteQty').value) || 0;
 	 
-	
 	// naver PW가 있다면 값을 복원하여 백엔드로 전달
 	let naverPw = "";
-    if (settings.naverPW) {		
+    if (settings && settings.naverPW) {		
 		settings.naverPW = deobfuscate(settings.naverPW); // 복원된 값을 다시 입력하여 settings자체를 parameter로 전달
     };
 	
 	// api호출시 log화면에 실시간으로 진행률을 보여주기위함
 	const logConsole = document.getElementById("logConsole");
 	// 새로운 실행이 시작될 때 기존 로그 제거
-    logConsole.innerHTML = "";
+	logConsole.innerHTML = "";
 	let lastServerLog = ""; // 서버에서 보낸 마지막 텍스트를 저장할 변수 에러인 경우는 마지막 텍스트를 보내줘야함
-	
+
+	 
 	const body = {        
 		settings : settings,
         useAiTool: selectedAiTool,
@@ -166,7 +166,7 @@ async function blogPostingStart(){
 	            ${finalMsg}
 	        </div>
 	        <div style="color: #ff6b6b; font-size: 0.9em;">
-	            > 로그 스트리밍이 중단되었습니다. 잠시 후 초기화됩니다.
+	            > 로그 스트리밍이 중단되었습니다. 잠시 후 다시 시도해주세요.
 	        </div>
 	    `;
 	    logConsole.innerHTML += errorMessage;
