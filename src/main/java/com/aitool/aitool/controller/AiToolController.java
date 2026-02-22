@@ -1,9 +1,11 @@
 package com.aitool.aitool.controller;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -15,6 +17,8 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import com.aitool.aitool.dto.requestPostingDTO;
 import com.aitool.aitool.service.AiToolService;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
 
@@ -42,30 +46,51 @@ public class AiToolController {
 
 				// [로그] 크롤링 시작
 				sendChatLog(emitter, "> 블로그 크롤링을 시작합니다...");
-				List<String> crawlingDataList = new ArrayList<>();
+				Map<String,Set<String>> crawlingLinkData = new LinkedHashMap<>();
 				for (int i = 0; i < categories.size(); i++) {
 					String category = categories.get(i);
 					// [로그] 카테고리별 진행 상황
 					sendChatLog(emitter, String.format("> [%d/%d] '%s' 카테고리 크롤링 중...", (i + 1), categories.size(), category));
 
 					// 실제 크롤링 서비스 로직 수행
-					String crawlingData = aiToolService.crawlingBlog(request, emitter, category); // TODO:  내부에서 로그를 더 세분화 하기위해 emitter를 서비스 레이어까지 넘겨줄것
-					crawlingDataList.add(crawlingData);
+					Set<String> categoryLinks = aiToolService.crawlingBlog(request, emitter, category); // TODO:  내부에서 로그를 더 세분화 하기위해 emitter를 서비스 레이어까지 넘겨줄것
+					if(categoryLinks.size() > 0) {
+						crawlingLinkData.put(category, categoryLinks);
+					}
 					sendChatLog(emitter, String.format("> [%s]에 대한 크롤링 완료...", category)); 
 				}
 				sendChatLog(emitter, "> 모든 카테고리에 대한 크롤링 완료!");
-//
-//				// [로그] 글 작성 단계
-//				sendChatLog(emitter, "> 크롤링 완료! 이제 AI 포스팅 작성을 시작합니다...");
-//
-//				// TODO: 실제 AI 포스팅 서비스 호출
-//				// Map<String, Object> result = aiToolService.generatePost(request);
-//
-//				sendChatLog(emitter, "> 모든 포스팅 작성이 완료되었습니다.");
-//
-//				// 작업 종료 알림 (complete를 호출해야 연결 종료)
-//				emitter.complete();
-//
+				
+				// Link에 대한 블로그 작성을 위하여 정리 시작
+				sendChatLog(emitter, "> AI 포스팅 작성을 위해 크롤링하여 가져온 데이터를 정리 합니다.");
+
+				// 카테고리별로 가져온 블로그/뉴스 Link를 토대로 AI에게 블로그 포스팅에 사용될 content를 제작하도록 하는 기능
+				List<String> generateResult = aiToolService.generateContent(request, emitter, crawlingLinkData);
+				
+				// AI를 통해 가져온 content목록을토대로 naver블로그 작성/임시작성
+				// JSON형태로 저장되어있으므로 각각 필요한 부분을 추출하여 마지막 단계 진행
+				ObjectMapper objectMapper = new ObjectMapper();
+				for(String answer : generateResult) {
+				    // 1. JSON String을 List<Map<String, Object>> 형태로 변환
+				    List<Map<String, Object>> postList = objectMapper.readValue(answer, new TypeReference<List<Map<String, Object>>>() {});
+	
+				    // 
+				    if (!postList.isEmpty()) {
+				        String title = (String) postList.get(0).get("title");
+				        String content = (String) postList.get(0).get("content");
+				        List<String> keywords = (List<String>) postList.get(0).get("keywords");
+				        
+				        System.out.println("제목: " + title);
+				        System.out.println("본문: " + content);
+				        System.out.println("keywords: " + keywords);
+				    }
+				}
+				
+				
+				sendChatLog(emitter, "> 모든 포스팅 작성이 완료되었습니다.");
+
+				// 작업 종료 알림 (complete를 호출해야 연결 종료)
+				emitter.complete();
 			} catch (Exception e) { 
 				// 1. 에러 문구를 명확하게 전송 (이게 lastServerLog에 담깁니다)
 			    sendChatLog(emitter, "> [실패] " + e.getMessage());

@@ -2,8 +2,10 @@ package com.aitool.aitool.service;
 
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -19,6 +21,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import com.aitool.aitool.config.ApiExceptionBuild;
+import com.aitool.aitool.dto.AiQuestionDTO;
 import com.aitool.aitool.dto.requestPostingDTO;
 
 import lombok.RequiredArgsConstructor;
@@ -34,11 +37,10 @@ public class AiToolService {
             .build();
     
 	@SuppressWarnings({ "unchecked", "rawtypes" }) // gemini 관련 return값에대한 Warning 제거
-	public String crawlingBlog(requestPostingDTO request, SseEmitter emitter, String category) {
+	public Set<String> crawlingBlog(requestPostingDTO request, SseEmitter emitter, String category) {
 		Map<String, Object> response = new HashMap<>();
 	    String answer = "";  
 		try {
-			StringBuilder crawlingData = new StringBuilder();			
 			String apiKey = (String) request.getSettings().get("aiToolKey");
 			
 			String encodedCategory = URLEncoder.encode(category, "UTF-8");
@@ -49,7 +51,7 @@ public class AiToolService {
 	        Set<String> uniqueBlogLinks = new LinkedHashSet<>();
 	        Set<String> uniqueNewsLinks = new LinkedHashSet<>();
 			 
-	     // 1. 블로그 크롤링
+	        // 블로그 크롤링
 	        if (request.getCrawlingBlogQty() > 0) {
 	            Document doc = fetchDocument(blogUrl);
 	            if (doc != null) {
@@ -57,22 +59,23 @@ public class AiToolService {
 	            }
 	        }
 
-	        // 2. 뉴스 크롤링
+	        // 뉴스 크롤링
 	        if (request.getCrawlingNewsQty() > 0) {
 	            Document doc = fetchDocument(newsUrl);
 	            if (doc != null) {
 	                buildCrawling(doc, uniqueNewsLinks, newsUrl, emitter, request.getCrawlingNewsQty(), "news");
 	            }
 	        }
-			
-			for(String s : uniqueBlogLinks) {
-				sendChatLog(emitter, String.format("> 블로그 크롤링 대기 주소 : [%s] ", s));
+	        
+	        // link주소 병합
+	        Set<String> allLinks = new LinkedHashSet<>(); // 뉴스와 블로그 link를 병합
+			if(uniqueBlogLinks.size() > 0) {
+				allLinks.addAll(uniqueBlogLinks); // 블로그 링크 추가
+			}
+			if(uniqueNewsLinks.size() > 0) {
+				allLinks.addAll(uniqueNewsLinks); // 뉴스 링크 추가
 			}			
-			for(String s : uniqueNewsLinks) {
-				sendChatLog(emitter, String.format("> 뉴스 크롤링 대기 주소 : [%s] ", s));
-			}			
-			
-			return crawlingData.toString();
+			return allLinks;
 		} catch (Exception e) {
 			answer = "크롤링 중 오류 발생: " + e.getMessage();
 			int code = Integer.parseInt(e.getMessage().split(" ")[0]);
@@ -88,6 +91,107 @@ public class AiToolService {
 			}
 		}
     }
+	
+	
+	
+	public List<String> generateContent(requestPostingDTO request, SseEmitter emitter, Map<String, Set<String>> crawlingLinkData){
+		String answer = "";
+		try {
+			String apiKey = (String) request.getSettings().get("aiToolKey");
+
+			int tempWrite = request.getTempWriteQty(); // 포스팅을 임시 저장 할 갯수 
+			int writeQty = request.getRealWriteQty();  // 바로 포스팅할 갯수
+			
+			// 질문 생성 (예시: 카테고리에 맞는 블로그 글 작성 요청)
+			List<String> resultList = new ArrayList<>();
+			Set<String> categorys = crawlingLinkData.keySet();
+			
+			String extraPrompt = "";
+			Map<String,Object> settings = request.getSettings();
+			// 만약 설정에 사용자가 추가한 추가명령프롬포트가 존재하는경우 추가
+			if(request.isUseAiTool()) {
+				if (settings.containsKey("extraPrompt") && settings.get("extraPrompt") != null) {
+				    Map<String, Object> prompt = (Map<String, Object>) settings.get("extraPrompt");
+				    extraPrompt = (String) prompt.getOrDefault("content", "");
+				}
+			}
+			// 모든 카테고리와 링크를 하나로 취합
+			StringBuilder allDataContext = new StringBuilder();
+			List<String> allCategoryNames = new ArrayList<>();
+
+			for (String category : categorys) {
+			    allCategoryNames.add(category);
+			    Set<String> links = crawlingLinkData.get(category);
+			    allDataContext.append(String.format("\n[카테고리: %s] \n링크 리스트: %s\n", category, links));
+			}
+			// 2. 통합 프롬프트 구성
+			String totalCategories = String.join(", ", allCategoryNames);
+			String postPrompt = String.format(
+			    "제공된 모든 정보를 기반으로 전문적인 블로그 콘텐츠를 제작하는 '콘텐츠 아키텍트' 역할을 수행해줘.\n"
+			    + "\n1. 전체 데이터 소스 분석: "
+			    + "\n - 통합 카테고리 범위: [%s] "
+			    + "\n - 수집된 전체 정보 내역: \n [%s] \n이 모든 링크의 내용을 유기적으로 분석하여 서로 보완적인 포스팅을 만들어야 해."
+			    
+			    + "\n2. 생성 규칙: "
+			    + "\n - 요청한 총 포스팅 개수: %d개 "
+			    + "\n - 각 포스팅은 위 카테고리들의 정보를 골고루 섞거나, 특정 주제를 심화하여 중복되지 않게 구성할 것. "
+			    + "\n - 단순 나열이 아닌, 사람이 쓴 것 같은 기승전결이 뚜렷한 서사 구조로 작성할 것."
+			    
+				+ "\n3. 출력 형식 및 스타일 제약: "
+				+ "\n - 반드시 아래 JSON 배열 형식을 지킬 것: [ { 'title': '...', 'content': '...', 'keywords': [...] } ]"
+				+ "\n - [문단 구성]: 한 문단은 2~3개 문장을 묶어서 구성하고, 문단 사이에는 단일 줄바꿈만 사용하여 자연스럽게 연결할 것."
+				+ "\n - [여백 활용]: 큰 주제가 바뀌어 환기가 필요한 시점에만 두 번의 줄바꿈(\\n\\n)을 사용하여 가독성을 높일 것."
+				+ "\n - [절대 금지] '서론/본론/결론', '###', '1.', '가.' 등 번호를 매기거나 목차용 단어를 절대 쓰지 말 것."
+				+ "\n - [권장] 소제목은 대괄호나 기호 없이, 본문보다 조금 더 힘이 실린 문장 형태로 작성하고 바로 다음 줄부터 본문을 이어갈 것."
+			    
+			    + "\n4. 사용자 추가 지시사항: "
+			    + "\n - %s", totalCategories, allDataContext.toString(), (tempWrite + writeQty), extraPrompt);
+			
+				
+			// Gemini API 요청 바디 구성 (Gemini 전용 구조)
+			// 1. 설정값 생성 (2000자 이상을 위해 maxOutputTokens를 크게 설정, 창의성은 0~2사이 적절하게 0.8)
+			AiQuestionDTO.GenerationConfig config = new AiQuestionDTO.GenerationConfig(
+					8192, // 충분한 토큰 확보 (한글 기준 약 2,000~4,000자 가능)
+					0.8, // 창의적으로 풍부하게 쓰도록 설정
+					"application/json" // 기본 텍스트 응답 (JSON이 필요하면 "application/json")
+			);
+
+			// 2. 바디 구성 (생성자에 config 추가)
+			AiQuestionDTO body = new AiQuestionDTO(List.of(new AiQuestionDTO.Content(List.of(new AiQuestionDTO.Part(postPrompt)))), config);
+
+			// 질문과 함께 gemini 호출
+			String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent";
+
+			Map<String, Object> rawResponse = webClient.post().uri(url).header("x-goog-api-key", apiKey).bodyValue(body)
+					.retrieve().bodyToMono(Map.class).block();
+
+			// 질문 답변을 추출
+			if (rawResponse != null && rawResponse.containsKey("candidates")) {
+				List candidates = (List) rawResponse.get("candidates");
+				Map firstCandidate = (Map) candidates.get(0);
+				Map content = (Map) firstCandidate.get("content");
+				List parts = (List) content.get("parts");
+				Map firstPart = (Map) parts.get(0);
+				answer = (String) firstPart.get("text");
+			}
+
+			resultList.add(answer);
+			return resultList;
+		} catch (Exception e) {
+			answer = "크롤링 중 오류 발생: " + e.getMessage();
+			int code = Integer.parseInt(e.getMessage().split(" ")[0]);
+			switch (code) {
+			case 400:
+				throw new ApiExceptionBuild(HttpStatus.BAD_REQUEST, answer);
+			case 404:
+				throw new ApiExceptionBuild(HttpStatus.NOT_FOUND, answer);
+			case 429:
+				throw new ApiExceptionBuild(HttpStatus.TOO_MANY_REQUESTS, answer);
+			default:
+				throw new ApiExceptionBuild(HttpStatus.INTERNAL_SERVER_ERROR, answer);
+			}
+		}
+	}
 	
 	// Jsoup 접속 공통화
 	private Document fetchDocument(String url) {
@@ -152,35 +256,7 @@ public class AiToolService {
 	    }
 	}
 	
-//	try {
-//		String apiKey = (String) request.getSettings().get("aiToolKey");
-//		 
-//		// 구글에서 카테고리별 키워드로 검색 (실제 URL은 조정 필요)
-//		String searchUrl = "https://namu.wiki/w/" + URLEncoder.encode(category, "UTF-8");
-//
-//		// 질문 생성 (예시: 카테고리에 맞는 블로그 글 작성 요청)
-//		String crawlingRequestBody = category.toString() + "에 대한 블로그 크롤링을 시작해줘 참고할만한 자료는 해당 URL에 있어 : "+ searchUrl;
-//
-//		// Gemini API 요청 바디 구성 (Gemini 전용 구조)
-//		AiQuestionDTO body = new AiQuestionDTO(List.of(new AiQuestionDTO.Content(List.of(new AiQuestionDTO.Part(crawlingRequestBody)))));
-//
-//		// 질문과 함께 gemini 호출
-//		String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent";
-//
-//		Map<String, Object> rawResponse = webClient.post().uri(url).header("x-goog-api-key", apiKey).bodyValue(body).retrieve().bodyToMono(Map.class).block();
-//
-//		// 질문 답변을 추출
-//		if (rawResponse != null && rawResponse.containsKey("candidates")) {
-//			List candidates = (List) rawResponse.get("candidates");
-//			Map firstCandidate = (Map) candidates.get(0);
-//			Map content = (Map) firstCandidate.get("content");
-//			List parts = (List) content.get("parts");
-//			Map firstPart = (Map) parts.get(0);
-//			answer = (String) firstPart.get("text");
-//		} 
-//		
-//		return answer;
-//	} 
+
     
 	// 로그 전송을 위한 헬퍼 메소드
 	private void sendChatLog(SseEmitter emitter, String message) {
