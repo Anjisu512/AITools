@@ -13,6 +13,7 @@
 	<div th:replace="~{common/sideMenu :: sideMenu}"></div>
 	<div class="container">
 		<h2>License Key 입력</h2>
+		<p style="font-size: 10px; color: gray;"> 현재는 체험버전이므로 좌측 사이드 메뉴를 클릭하여 해당 페이지를 벗어나주세요. 도움말은 작동하지않습니다</p>
 		<div class="input-group">
 			<input type="text" id="licenseKey" placeholder="라이선스 키를 입력하세요">
 			<button type="button" onclick="verify()">확인</button>
@@ -21,10 +22,12 @@
 	</div>
 
 	<div th:replace="~{common/customAlert :: customAlert}"></div>
+	<div th:replace="~{common/customConfirm  :: customConfirm}"></div>
 	
 	<script th:src="@{/js/main.js}"></script>
 	<script th:src="@{/js/licenseVerify.js}"></script>
 	<script th:src="@{/js/customAlert.js}"></script>
+	<script th:src="@{/js/customConfirm.js}"></script>
 </body>
 
 </html>

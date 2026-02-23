@@ -71,3 +71,25 @@
         transform: scale(1);
     }
 }
+
+/* 버튼 두 개를 가로로 배치 */
+.custom-confirm-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 30px; /* 버튼 사이 간격 */
+}
+
+/* 취소 버튼 스타일 (붉은빛) */
+.custom-alert-button.cancel-button {
+    background-color: #e74c3c;
+    border: 1px solid #c0392b;
+}
+
+.custom-alert-button.cancel-button:hover {
+    background-color: #c0392b;
+}
+
+#custom-confirm-message,
+#custom-alert-message{
+    white-space: pre-line; /* \n 또는 \r\n을 실제 줄바꿈으로 표시 */
+}

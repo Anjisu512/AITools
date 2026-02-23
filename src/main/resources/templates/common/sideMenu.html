@@ -19,11 +19,12 @@
 				<li><a th:href="@{/posting}">대시보드</a></li>
 				<li><a th:href="@{/settings}">설정</a></li>
 				<li><a href="#">도움말</a></li>
+				<li><a href="#" onclick="systemShutdown()">종료</a></li>
 			</ul>
 		</nav>
 		<div class="menu-footer">
 			<p>v1.0.0</p>
 		</div>
 	</div>
-
+	<script th:src="@{/js/main.js}"></script>
 </html>

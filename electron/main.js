@@ -1,4 +1,4 @@
-const { app, BrowserWindow, session } = require('electron'); 
+const { app, BrowserWindow, session, ipcMain } = require('electron');
 const { spawn } = require('child_process');
 const path = require('path');
 const http = require('http');
@@ -6,11 +6,7 @@ const http = require('http');
 let springProcess = null;
 let mainWindow = null;
 let splashWindow = null; // 로딩 창 변수 추가
-
-
-// dev일때는 __dirname을 사용
-const isDev = !app.isPackaged;
-
+ 
 // Spring Boot 시작 함수
 function startSpringBoot() {
 	const basePath = app.isPackaged
@@ -23,16 +19,27 @@ function startSpringBoot() {
     // jre설치위치
     const javaPath = path.join(basePath, 'jre', 'bin', 'java.exe');
 
-    console.log('Using Java:', javaPath);
-    console.log('Starting Spring Boot:', jarPath);
-
-    springProcess = spawn(javaPath, ['-jar', jarPath], {
-        stdio: 'inherit',   // build전에는 사용자에게 콘솔 안 보이게 : ignore
-        shell: false
+	
+ 	console.log('Starting Spring Boot in new window...');
+	
+	// Windows 환경에서 새로운 CMD 창을 띄워 Java 실행
+    springProcess = spawn('cmd.exe', [
+        '/c', 
+        'start', 
+        '"Spring Boot Server"', // CMD 창의 타이틀
+        javaPath, 
+        '-jar', 
+        jarPath
+    ], {
+        cwd: basePath,      // 작업 디렉토리 설정
+        shell: true,        // 쉘 명령 사용
+        detached: true,     // 부모 프로세스 독립
+        stdio: 'ignore'     // 새 창에서 출력되므로 현재 프로세스에선 무시
     });
+	springProcess.unref();
 
-    springProcess.on('close', (code) => {
-        console.log(`Spring Boot exited with code ${code}`);
+    springProcess.on('error', (err) => {
+        console.error('Failed to start Spring Boot:', err);
     });
 }
 
@@ -61,13 +68,19 @@ function createWindows() {
         show: false, // 서버 완료 전까지 숨김
 		icon: iconPath, // 앱 실행 시 아이콘
 		autoHideMenuBar: true, // Alt 키를 누를 때만 메뉴가 나오게 함 
-        webPreferences: { contextIsolation: true }
+		webPreferences: { 
+            contextIsolation: true,
+            // preload 파일을 연결해야 Java쪽에서 window.electronAPI가 작동함
+            preload: path.join(__dirname, 'preload.js') 
+        } 
     });
 	
 	// 아예 상단 메뉴 바를 완전히 삭제하고 싶다면 아래 한 줄 추가
 	mainWindow.setMenu(null);
 
-    const url = 'http://localhost:8080/loginLicense';
+	// 체험판이므로 license는 접근 금지
+    //const url = 'http://localhost:8080/loginLicense';
+	const url = 'http://localhost:8080/';
 
     // 서버 응답 체크 함수
     const checkServer = () => {
@@ -85,16 +98,49 @@ function createWindows() {
     checkServer();
 }
 
+// --- 추가된 종료 로직 (IPC 통신) ---
+
+ipcMain.on('request-quit', () => {
+    console.log('Safe shutdown requested...');
+
+    // 1. Java 서버에 종료 요청 (Graceful Shutdown)
+    const options = {
+        hostname: 'localhost',
+        port: 8080,
+        path: '/api/system/shutdown',
+        method: 'POST'
+    };
+
+    const req = http.request(options, (res) => {
+        console.log('Server is shutting down...');
+        app.quit(); // 서버 응답 받으면 Electron 종료
+    });
+
+    req.on('error', (e) => {
+        console.error('Server shutdown request failed, force quitting Electron...');
+        app.quit(); // 에러 시에도 앱은 종료
+    });
+
+    req.end();
+});
+
+// --------------------------------
+
 app.whenReady().then(() => {
     startSpringBoot(); 
     createWindows();
 });
 
-app.on('window-all-closed', () => {
-    if (springProcess) {
-        springProcess.kill(); // 자바 프로세스 종료
+app.on('window-all-closed', () => { 
+	// 사용자가 창을 그냥 닫았을 때도 Java를 죽이고 싶다면 아래 실행
+    if (process.platform === 'win32') {
+        const { exec } = require('child_process');
+        // Java 로그창 타이틀이 "Spring Boot Server"이므로 해당 창을 닫음
+        exec('taskkill /f /fi "windowtitle eq Spring Boot Server*" /t');
     }
+
     if (process.platform !== 'darwin') {
         app.quit();
     }
+	
 });

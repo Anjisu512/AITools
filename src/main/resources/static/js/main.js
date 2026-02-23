@@ -25,3 +25,16 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 });
+
+
+function systemShutdown() {
+    showConfirm(
+        "알림","정말 종료하시겠습니까? \n 확인을 누르면 서버가 안전하게 종료됩니다.",
+        function() {
+            // 확인 클릭 시: Electron 메인 프로세스로 신호 전달
+            window.electronAPI.quitApp();
+        },
+		// 취소 클릭 시
+        function() {}
+    );
+}

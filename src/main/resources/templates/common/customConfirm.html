@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+	<head>
+		<meta charset="UTF-8">
+		<title>페이지 제목</title>
+		<link rel="stylesheet" th:href="@{/css/customAlert.css}">
+		
+	</head>
+	
+	<body>
+		<div th:fragment="customConfirm" id="custom-confirm-overlay" class="custom-alert-overlay">
+			<div class="custom-alert-box">
+				<h3 id="custom-confirm-title"></h3>
+				<p id="custom-confirm-message"></p>
+				<div class="custom-confirm-buttons">
+					<button id="custom-confirm-ok-button" class="custom-alert-button">확인</button>
+					<button id="custom-confirm-cancel-button" class="custom-alert-button cancel-button">취소</button>
+				</div>
+			</div>
+		</div>
+		
+		<script th:src="@{/js/customConfirm.js}"></script>
+	</body>
+
+</html>

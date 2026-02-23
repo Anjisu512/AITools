@@ -49,11 +49,9 @@ public class AiToolController {
 				// 카테고리 리스트 파싱 (쉼표 기준)
 				List<String> categories = Arrays.stream(request.getSearchCategory().split(",")).map(String::trim)
 						.filter(s -> !s.isEmpty()).collect(Collectors.toList());
-				// Request 및 필수 Settings누락의 경우 에러 반환하도록 수정
-				if (categories.size() <= 0) {
-					throw new Exception("크롤링 및 포스팅을 위한 카테고리를 입력해주세요. ");
-				}
-				String errorMsg = checkRequiredData(request);
+
+				// Request 및 필수 Settings누락의 경우 에러 반환하도록 수정				
+				String errorMsg = checkRequiredData(request, categories);
 				// errorMsg가 ""가 아닌경우
 				if(!errorMsg.equals("")) {
 					throw new Exception(errorMsg);
@@ -140,7 +138,7 @@ public class AiToolController {
 	}
 
 	// 필수로 작성되어야하는 Setting값 혹은 데이터가 있는지 여부 체크
-	private String checkRequiredData(requestPostingDTO request) {
+	private String checkRequiredData(requestPostingDTO request, List<String>categories) {
 		Map<String, Object> settings = request.getSettings();
 		// settings가 아예 비어있는경우
 		if(settings == null) {
@@ -151,6 +149,15 @@ public class AiToolController {
 		if(apiKey == null || apiKey.isBlank()) {
 			return "AI Tool을 사용하기 위해서는 설정 페이지에서 GPT 혹은 Gemini의 API Key를 필수로 입력해야합니다.";
 		}
+		
+		// 카테고리를 입력하지않았거나 5개 이상의 카테고리를 입력한 경우
+		if(categories.size() <= 0) {
+			return "크롤링 및 포스팅을 위한 카테고리를 입력해주세요. ";
+		}
+		if(categories.size() > 5) {
+			return "크롤링 및 포스팅을 위한 카테고리는 5개 이하로만 입력해주세요. ";
+		}
+		
 		// 블로그 크롤링 수
 		int crawBlog = request.getCrawlingBlogQty();
 		// 뉴스 크롤링 수 
