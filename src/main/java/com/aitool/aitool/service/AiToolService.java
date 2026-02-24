@@ -26,11 +26,25 @@ import com.aitool.aitool.dto.requestPostingDTO;
 
 import lombok.RequiredArgsConstructor;
 
+
+import io.github.bonigarcia.wdm.WebDriverManager;
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.springframework.stereotype.Service;
+
+import java.util.Collections;
+
+
 @Service 
 @RequiredArgsConstructor
 public class AiToolService {
-
-	  // Gemini API의 베이스 URL 설정
+	// 네이버 블로그 작성을 위한 WebDriver
+	private WebDriver driver;
+	
+	// Gemini API의 베이스 URL 설정
     private final WebClient webClient = WebClient.builder()
             .baseUrl("https://generativelanguage.googleapis.com/v1beta/") 
             .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -193,6 +207,55 @@ public class AiToolService {
 		}
 	}
 	
+	
+	public void loginAndPrepare(String id, String pw, SseEmitter emitter) throws Exception {
+        WebDriverManager.chromedriver().setup();
+        ChromeOptions options = new ChromeOptions();
+        
+        // 사용자가 작성 과정(브라우저)을 보려면 headless 옵션을 제거해야함
+//        options.setExperimentalOption("useAutomationExtension", false);
+        options.addArguments("--disable-blink-features=AutomationControlled");
+        options.setExperimentalOption("excludeSwitches", Collections.singletonList("enable-automation"));
+        
+        driver = new ChromeDriver(options);
+        driver.manage().window().maximize();
+
+        // 로그인 페이지 이동
+        driver.get("https://nid.naver.com/nidlogin.login");
+        sendChatLog(emitter, "> 네이버 로그인 창을 활성화합니다. 과정을 지켜봐주세요.");
+
+        // 사람이 입력하는 것 처럼 JS로 우회 입력
+        sendChatLog(emitter, "> 아이디를 입력 중입니다...");
+        typeLikeHuman("id", id);
+        Thread.sleep((int)(Math.random() * 500) + 500); // 아이디 입력 후 잠시 멈춤
+
+        sendChatLog(emitter, "> 비밀번호를 입력 중입니다...");
+        typeLikeHuman("pw", pw);
+        Thread.sleep((int)(Math.random() * 500) + 500); // 비번 입력 후 잠시 멈춤
+
+        // 3. 로그인 버튼 클릭
+        driver.findElement(By.id("log.login")).click();
+        
+        // 4. 로그인 완료 대기 (메인 화면이나 알림창 등이 뜰 때까지 대기)
+        Thread.sleep(3000); 
+        
+        if(driver.getCurrentUrl().contains("login.login")) {
+            sendChatLog(emitter, "> [알림] 캡차(보안문자)가 떴을 수 있습니다. 브라우저에서 직접 해결해주세요.");
+            // 사용자가 수동으로 풀 시간을 주기 위해 반복문으로 URL 변화를 체크하거나 길게 대기
+            Thread.sleep(10000); 
+        }
+        
+        driver.get("https://blog.naver.com/GoBlogWrite.naver");
+        
+    }
+	
+	// 브라우저 종료
+    public void quit() {
+        if (driver != null) {
+        	driver.quit();
+        }
+    }
+	
 	// Jsoup 접속 공통화
 	private Document fetchDocument(String url) {
 	    try {
@@ -267,4 +330,26 @@ public class AiToolService {
 		}
 	}
     
+	// 사용자가 입력하는것 처럼 눈속임
+	public void typeLikeHuman(String elementSelector, String text) throws InterruptedException {
+	    JavascriptExecutor js = (JavascriptExecutor) driver;
+	    String currentText = "";
+	    
+	    for (char c : text.toCharArray()) {
+	        currentText += c;
+	        // 한 글자씩 추가하며 입력
+	        js.executeScript("document.getElementsByName('" + elementSelector + "')[0].value='" + currentText + "';");
+	        
+	        // 기본 300ms ~ 800ms 사이 랜덤
+	        int delay = (int) (Math.random() * 500) + 300; 
+	        
+	        // 5글자마다 한 번씩 0.5초~1초 정도 더 길게 쉼 (생각하는 척)
+	        if (currentText.length() % 5 == 0) {
+	            delay += (int) (Math.random() * 500) + 500;
+	        }
+	        
+	        Thread.sleep(delay);
+	    }
+	}
+	
 }

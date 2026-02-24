@@ -33,6 +33,7 @@ dependencies {
 	//MSSQL JDBC
 	implementation 'com.microsoft.sqlserver:mssql-jdbc:12.6.1.jre11'
 	
+    // JSON 처리용도
 	implementation 'com.fasterxml.jackson.core:jackson-databind'
 	
 	//AI Impl
@@ -42,6 +43,13 @@ dependencies {
     
     // 웹 크롤링을 위한 라이브러리
     implementation 'org.jsoup:jsoup:1.17.2'
+    
+    // Selenium Java (브라우저 제어 핵심 라이브러리)
+    implementation 'org.seleniumhq.selenium:selenium-java:4.18.1'
+
+    // WebDriverManager (크롬 드라이버 버전을 자동으로 맞춰줌)
+    implementation 'io.github.bonigarcia:webdrivermanager:5.7.0'
+    
     
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
