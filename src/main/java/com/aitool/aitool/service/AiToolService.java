@@ -3,6 +3,7 @@ package com.aitool.aitool.service;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -13,6 +14,11 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -24,18 +30,9 @@ import com.aitool.aitool.config.ApiExceptionBuild;
 import com.aitool.aitool.dto.AiQuestionDTO;
 import com.aitool.aitool.dto.requestPostingDTO;
 
-import lombok.RequiredArgsConstructor;
-
-
 import io.github.bonigarcia.wdm.WebDriverManager;
-import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
-import org.springframework.stereotype.Service;
-
-import java.util.Collections;
+import lombok.RequiredArgsConstructor;
+import reactor.core.publisher.Mono;
 
 
 @Service 
@@ -106,6 +103,65 @@ public class AiToolService {
 		}
     }
 	
+	// 단일 포스팅 생성을 위한 메서드로 분리
+	public Mono<String> generateSinglePost(requestPostingDTO request, String allDataContext, int totalCount, int currentIndex) {
+	    String apiKey = (String) request.getSettings().get("aiToolKey");
+	    String extraPrompt = "";
+	    Map<String, Object> settings = request.getSettings();
+	    
+	    // 안전한 extraPrompt 추출 로직
+	    if (request.isUseAiTool() && settings != null && settings.get("extraPrompt") != null) {
+	        Object rawPrompt = settings.get("extraPrompt");
+	        if (rawPrompt instanceof Map) {
+	            Map<String, Object> prompt = (Map<String, Object>) rawPrompt;
+	            extraPrompt = String.valueOf(prompt.getOrDefault("content", ""));
+	        }
+	    }
+
+	    // [중요] 1개 분량의 통합 기반 프롬프트 구성
+	    String postPrompt = String.format(
+	        "너는 수집된 다각도의 정보를 분석하여 독창적인 블로그 포스팅을 작성하는 '콘텐츠 아키텍트'야.\n\n"
+	        + "[1. 전체 분석 데이터 소스]:\n%s\n\n"
+	        + "[2. 현재 작업 지시]:\n"
+	        + "- 너는 위 데이터를 활용해 총 %d개의 서로 다른 포스팅을 만들어야 해.\n"
+	        + "- 지금 네가 작성할 포스팅은 그중 [%d번째] 글이야.\n"
+	        + "- [필수] 앞선 글들과 내용이나 관점이 중복되지 않도록, 이번 글은 특정 카테고리에 집중하거나 새로운 시각에서 작성해줘.\n\n"
+	        + "[3. 출력 형식 및 제약]:\n"
+	        + "- 반드시 JSON 배열 [ { 'title': '...', 'content': '...', 'tagKeywords': [...] } ] 형식을 엄수할 것.\n"
+	        + "- '서론/본론/결론', '###', '번호 매기기' 절대 금지. 사람이 쓴 것 같은 자연스러운 서사 구조로 작성할 것.\n\n"
+	        + "[4. 사용자 추가 요청]: %s", 
+	        allDataContext, totalCount, currentIndex, extraPrompt);
+
+	    // 응답 길이를 고려하여 maxOutputTokens 설정 (1개 포스팅이므로 2048~4096이면 충분함)
+	    AiQuestionDTO.GenerationConfig config = new AiQuestionDTO.GenerationConfig(2048, 0.8, "application/json");
+	    AiQuestionDTO body = new AiQuestionDTO(List.of(new AiQuestionDTO.Content(List.of(new AiQuestionDTO.Part(postPrompt)))), config);
+
+	    String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent";
+
+	    return webClient.post()
+	            .uri(url)
+	            .header("x-goog-api-key", apiKey)
+	            .bodyValue(body)
+	            .retrieve()
+	            .bodyToMono(Map.class)
+	            .map(rawResponse -> {
+	                // 응답 추출 및 Null 방어 로직
+	                try {
+	                    List candidates = (List) rawResponse.get("candidates");
+	                    if (candidates != null && !candidates.isEmpty()) {
+	                        Map firstCandidate = (Map) candidates.get(0);
+	                        Map content = (Map) firstCandidate.get("content");
+	                        List parts = (List) content.get("parts");
+	                        Map firstPart = (Map) parts.get(0);
+	                        return (String) firstPart.get("text");
+	                    }
+	                } catch (Exception e) {
+	                    return "{\"error\": \"응답 파싱 실패\"}";
+	                }
+	                return "{\"error\": \"결과 없음\"}";
+	            })
+	            .onErrorResume(e -> Mono.just("{\"error\": \"" + e.getMessage() + "\"}"));
+	}
 	
 	
 	public List<String> generateContent(requestPostingDTO request, SseEmitter emitter, Map<String, Set<String>> crawlingLinkData){
