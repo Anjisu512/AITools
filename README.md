@@ -24,8 +24,9 @@
 ### 🚧 Current Status
 현재는 **카테고리별 콘텐츠를 생성한 뒤 `C:\AITool` 경로에 Text 파일로 저장하는 기능까지 구현된 상태입니다.**  
 향후 네이버 블로그 자동 업로드 및 스케줄링 기능을 추가할 예정입니다.
+---
 
-## 🏗️ System Data Flow
+### 🏗️ System Data Flow 
 
 ```mermaid
 sequenceDiagram
