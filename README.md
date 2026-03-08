@@ -13,10 +13,10 @@
 단순한 스크립트를 넘어, 확장 가능한 **Backend-to-Desktop 아키텍처**를 지향합니다.
 
 ### 🧩 Key Implementation
-- **AI Orchestration:** 다중 LLM(OpenAI, Google Gemini) API를 활용한 컨텐츠 품질 최적화.
-- **Robust Integration:** Java Spring Boot 기반의 안정적인 API 통신 모듈 및 인증(OAuth 2.0) 처리.
-- **Hybrid Desktop Arch:** Electron과 Java 로컬 서버 간의 고성능 REST/IPC 통신 구조 확립.
-- **Containerized Environment:** Docker 기반 빌드 표준화로 서비스 실행 및 배포 환경의 일관성 확보.
+- **AI Integration:** OpenAI와 Google Gemini API를 활용하여 AI 기반 콘텐츠 생성 기능 구현
+- **Backend Communication:** Java Spring Boot 기반 API 통신 모듈 및 OAuth 2.0 인증 처리 구현
+- **Desktop Architecture:** Electron과 Java 로컬 서버 간 REST API 기반 통신 구조 설계
+- **Build Environment:** Docker를 활용한 개발 및 실행 환경 표준화
 ---
 
 
@@ -40,4 +40,5 @@ sequenceDiagram
 ```
 
 ## 📺 시연 영상 (Demo)
-![Demo GIF](https://private-user-images.githubusercontent.com/117149097/558754140-f265ecfc-f625-4cd9-9e3c-5617135f9c62.gif?jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NzI3MjA5NjEsIm5iZiI6MTc3MjcyMDY2MSwicGF0aCI6Ii8xMTcxNDkwOTcvNTU4NzU0MTQwLWYyNjVlY2ZjLWY2MjUtNGNkOS05ZTNjLTU2MTcxMzVmOWM2Mi5naWY_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjYwMzA1JTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI2MDMwNVQxNDI0MjFaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT0zODZmMzQ5NmNlNWEyYjJlYzVmOTUxNDE1YTVjYjNlZTNjMmVkMDBhYWNmNTZmMDg2Y2I5YTJjYmY5MTJjMzQwJlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.duooaHx8AqVVZQh5w6OART5yqGk3_p5UfzFCXcQ9S20)
+![Demo GIF_1](https://github.com/user-attachments/assets/c5a2803f-d8e9-4c2b-a8ac-319679953e92)
+
