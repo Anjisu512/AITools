@@ -13,6 +13,7 @@
 단순한 스크립트를 넘어, 확장 가능한 **Backend-to-Desktop 아키텍처**를 지향합니다.  
 [소스파일이아닌 실행파일만 원하는경우는 여기를 클릭해주세요](https://drive.google.com/file/d/14pRER_a6oc1Hn77wj7rb4VRkirMYUfxa/view?usp=drive_link)
 
+
 ### 🧩 Key Implementation
 - **AI Integration:** OpenAI와 Google Gemini API를 활용하여 AI 기반 콘텐츠 생성 기능 구현
 - **Backend Communication:** Java Spring Boot 기반 API 통신 모듈 및 OAuth 2.0 인증 처리 구현
@@ -20,6 +21,9 @@
 - **Build Environment:** Docker를 활용한 개발 및 실행 환경 표준화
 ---
 
+### 🚧 Current Status
+현재는 **카테고리별 콘텐츠를 생성한 뒤 `C:\AITool` 경로에 Text 파일로 저장하는 기능까지 구현된 상태입니다.**  
+향후 네이버 블로그 자동 업로드 및 스케줄링 기능을 추가할 예정입니다.
 
 ## 🏗️ System Data Flow
 
