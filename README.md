@@ -9,9 +9,9 @@
 ---
 
 ## 📌 Project Strategy
-본 프로젝트는 **PLM/ALM 환경에서 축적한 시스템 통합(SI) 및 워크플로우 설계 경험**을 퍼스널 도구로 확장한 사례입니다. 
-단순한 스크립트를 넘어, 확장 가능한 **Backend-to-Desktop 아키텍처**를 지향합니다.
-[소스파일이아닌 실행파일만 원하는경우는 여기를 클릭해주세요]
+본 프로젝트는 **PLM/ALM 환경에서 축적한 시스템 통합(SI) 및 워크플로우 설계 경험**을 퍼스널 도구로 확장한 사례입니다.  
+단순한 스크립트를 넘어, 확장 가능한 **Backend-to-Desktop 아키텍처**를 지향합니다.  
+[소스파일이아닌 실행파일만 원하는경우는 여기를 클릭해주세요](https://github.com/Anjisu512/Ai-Tool-Demo.git)
 
 ### 🧩 Key Implementation
 - **AI Integration:** OpenAI와 Google Gemini API를 활용하여 AI 기반 콘텐츠 생성 기능 구현
