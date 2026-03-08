@@ -22,7 +22,24 @@ function startSpringBoot() {
 	
  	console.log('Starting Spring Boot in new window...');
 	
-	// Windows 환경에서 새로운 CMD 창을 띄워 Java 실행
+	// 콘솔창 숨기는 버전(유저배포용)
+	springProcess = spawn(javaPath, [
+	        '-jar',
+	        jarPath
+	    ], {
+	        cwd: basePath,
+	        detached: true,
+	        windowsHide: true,
+	        stdio: 'ignore'
+	    });
+
+	    springProcess.unref();
+
+	    springProcess.on('error', (err) => {
+	        console.error('Failed to start Spring Boot:', err);
+	    });
+		
+	/* Windows 환경에서 새로운 CMD 창을 띄워 Java 실행 - 관리자용 배포
     springProcess = spawn('cmd.exe', [
         '/c', 
         'start', 
@@ -41,10 +58,11 @@ function startSpringBoot() {
     springProcess.on('error', (err) => {
         console.error('Failed to start Spring Boot:', err);
     });
+	*/
 }
 
 // icon의 경로
-const iconPath = path.join(__dirname, 'img', 'icon.ico');
+const iconPath = path.join(__dirname, 'img', 'AiTool.ico');
 
 // 프로그램창 생성 및 제어 로직
 function createWindows() {

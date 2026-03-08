@@ -24,7 +24,7 @@
 		},
 		"win": {
 			"target": "portable",
-			"icon": "img/icon.ico" 			
+			"icon": "img/AiTool.ico" 			
 		}
 	}
 }

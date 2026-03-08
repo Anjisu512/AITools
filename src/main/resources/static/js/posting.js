@@ -72,6 +72,13 @@ function valueHandler(btn, step) {
 
 
 async function blogPostingStart(){
+	// 실행 버튼 비활성화
+	const startBtn = document.getElementById('startBtn');
+    if (startBtn) {
+        startBtn.disabled = true;
+        startBtn.innerText = "로직 실행 중..."; // 상태를 시각적으로 표시
+    }
+		
 	// storage에 담겨있는 정보와 대시보드내에 있는 정보들 get
 	const stored = localStorage.getItem('appSettings');
 	const settings = JSON.parse(stored);
@@ -171,6 +178,12 @@ async function blogPostingStart(){
 	    `;
 	    logConsole.innerHTML += errorMessage;
 	    logConsole.scrollTop = logConsole.scrollHeight;
+	} finally {
+        // 버튼을 다시 활성화
+        if (startBtn) {
+            startBtn.disabled = false;
+            startBtn.innerText = "Ai Tool 실행"; // 문구 복구
+        }
     }
 }
 
